@@ -13,7 +13,7 @@ export interface User {
 }
 
 // Typy dla zadań
-export type TaskStatus = "pending" | "todo" | "in_progress" | "review" | "completed" | "in progress";
+export type TaskStatus = "pending" | "todo" | "in_progress" | "review" | "completed";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 export interface Task {

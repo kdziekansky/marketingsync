@@ -1,304 +1,271 @@
 
-import { User, Client, Task, Document, Invoice, AdsData, UserRole } from "./types";
+import { User, Task, Document, Invoice, AdsData } from "./types";
 
-// Helper to generate IDs
-const generateId = (): string => Math.random().toString(36).substring(2, 10);
-
-// Users
+// Użytkownicy
 export const users: User[] = [
   {
-    id: "user1",
+    id: "1",
     name: "Jan Kowalski",
-    email: "jan@digitalagency.com",
+    email: "jan@agencja.pl",
     role: "superadmin",
-    avatar: "https://ui-avatars.com/api/?name=Jan+Kowalski&background=0D8ABC&color=fff"
+    avatar: "https://i.pravatar.cc/150?img=1"
   },
   {
-    id: "user2",
+    id: "2",
     name: "Anna Nowak",
-    email: "anna@digitalagency.com",
+    email: "anna@agencja.pl",
     role: "admin",
-    avatar: "https://ui-avatars.com/api/?name=Anna+Nowak&background=0D8ABC&color=fff"
+    avatar: "https://i.pravatar.cc/150?img=5"
   },
   {
-    id: "user3",
-    name: "Piotr Wiśniewski",
-    email: "piotr@digitalagency.com",
+    id: "3",
+    name: "Tomasz Wiśniewski",
+    email: "tomasz@agencja.pl",
     role: "employee",
-    avatar: "https://ui-avatars.com/api/?name=Piotr+Wiśniewski&background=0D8ABC&color=fff"
+    departmentId: "1",
+    avatar: "https://i.pravatar.cc/150?img=3"
   },
   {
-    id: "user4",
-    name: "Marta Lewandowska",
-    email: "marta@digitalagency.com",
+    id: "4",
+    name: "Monika Lewandowska",
+    email: "monika@agencja.pl",
     role: "employee",
-    avatar: "https://ui-avatars.com/api/?name=Marta+Lewandowska&background=0D8ABC&color=fff"
+    departmentId: "2",
+    avatar: "https://i.pravatar.cc/150?img=4"
   },
   {
-    id: "user5",
-    name: "Tomasz Kamiński",
-    email: "tomasz@client1.com",
-    role: "client",
-    clientId: "client1",
-    avatar: "https://ui-avatars.com/api/?name=Tomasz+Kamiński&background=6E0DAB&color=fff"
-  },
-  {
-    id: "user6",
-    name: "Katarzyna Wójcik",
-    email: "katarzyna@client2.com",
-    role: "client",
-    clientId: "client2",
-    avatar: "https://ui-avatars.com/api/?name=Katarzyna+Wójcik&background=AB0D0D&color=fff"
-  }
-];
-
-// Clients
-export const clients: Client[] = [
-  {
-    id: "client1",
+    id: "5",
     name: "Firma ABC",
-    logoUrl: "https://ui-avatars.com/api/?name=Firma+ABC&background=6E0DAB&color=fff&format=svg",
-    contactName: "Tomasz Kamiński",
-    contactEmail: "tomasz@client1.com",
-    contactPhone: "+48 123 456 789"
+    email: "kontakt@abc.pl",
+    role: "client",
+    clientId: "1",
+    avatar: "https://i.pravatar.cc/150?img=9"
   },
   {
-    id: "client2",
-    name: "Korporacja XYZ",
-    logoUrl: "https://ui-avatars.com/api/?name=Korporacja+XYZ&background=AB0D0D&color=fff&format=svg",
-    contactName: "Katarzyna Wójcik",
-    contactEmail: "katarzyna@client2.com",
-    contactPhone: "+48 987 654 321"
+    id: "6",
+    name: "XYZ Sp. z o.o.",
+    email: "biuro@xyz.pl",
+    role: "client",
+    clientId: "2",
+    avatar: "https://i.pravatar.cc/150?img=10"
   }
 ];
 
-// Tasks
+// Klienci
+export const clients = [
+  {
+    id: "1",
+    name: "Firma ABC",
+    contactPerson: "Adam Nowacki",
+    email: "kontakt@abc.pl",
+    phone: "+48 123 456 789",
+    address: "ul. Główna 1, 00-001 Warszawa"
+  },
+  {
+    id: "2",
+    name: "XYZ Sp. z o.o.",
+    contactPerson: "Zofia Kowalczyk",
+    email: "biuro@xyz.pl",
+    phone: "+48 987 654 321",
+    address: "ul. Boczna 2, 00-002 Warszawa"
+  }
+];
+
+// Zadania
 export const tasks: Task[] = [
   {
-    id: "task1",
-    title: "Przygotowanie kampanii FB",
-    description: "Przygotowanie kreacji graficznych i tekstów do kampanii na Facebook.",
+    id: "1",
+    title: "Przygotowanie kampanii Google Ads",
+    description: "Przygotowanie kampanii reklamowej dla nowego produktu klienta",
+    status: "pending",
+    priority: "high",
+    clientId: "1",
+    assigneeId: "3",
+    createdAt: "2023-05-15T10:00:00Z",
+    dueDate: "2023-05-20T18:00:00Z",
+    labels: ["google-ads", "kampania"]
+  },
+  {
+    id: "2",
+    title: "Aktualizacja strony www",
+    description: "Aktualizacja treści na stronie głównej klienta",
     status: "in_progress",
-    clientId: "client1",
-    assigneeId: "user3",
-    createdAt: "2023-06-01T10:00:00Z",
-    dueDate: "2023-06-10T18:00:00Z",
-    priority: "high",
-    tags: ["facebook", "kreacja"]
-  },
-  {
-    id: "task2",
-    title: "Optymalizacja SEO",
-    description: "Audyt i optymalizacja strony internetowej pod kątem SEO.",
-    status: "pending",
-    clientId: "client1",
-    createdAt: "2023-06-02T09:30:00Z",
-    dueDate: "2023-06-15T18:00:00Z",
     priority: "medium",
-    tags: ["seo", "audyt"]
+    clientId: "1",
+    assigneeId: "4",
+    createdAt: "2023-05-14T14:30:00Z",
+    dueDate: "2023-05-18T16:00:00Z",
+    labels: ["www", "content"]
   },
   {
-    id: "task3",
-    title: "Raport miesięczny",
-    description: "Przygotowanie raportu z wyników kampanii za ostatni miesiąc.",
-    status: "completed",
-    clientId: "client1",
-    assigneeId: "user4",
-    createdAt: "2023-05-25T14:00:00Z",
-    dueDate: "2023-06-05T18:00:00Z",
-    priority: "medium",
-    tags: ["raport"]
-  },
-  {
-    id: "task4",
-    title: "Kampania Google Ads",
-    description: "Przygotowanie i uruchomienie kampanii w Google Ads.",
+    id: "3",
+    title: "Raport z kampanii FB",
+    description: "Przygotowanie raportu z wyników kampanii na Facebooku",
     status: "review",
-    clientId: "client2",
-    assigneeId: "user3",
-    createdAt: "2023-06-03T11:15:00Z",
-    dueDate: "2023-06-12T18:00:00Z",
-    priority: "high",
-    tags: ["google ads", "ppc"]
+    priority: "low",
+    clientId: "2",
+    assigneeId: "3",
+    createdAt: "2023-05-10T09:15:00Z",
+    dueDate: "2023-05-17T12:00:00Z",
+    labels: ["facebook", "raport"]
   },
   {
-    id: "task5",
-    title: "Projekt graficzny ulotki",
-    description: "Zaprojektowanie ulotki reklamowej w formacie A5.",
-    status: "pending",
-    clientId: "client2",
-    createdAt: "2023-06-05T13:45:00Z",
-    dueDate: "2023-06-20T18:00:00Z",
-    priority: "low",
-    tags: ["grafika", "druk"]
+    id: "4",
+    title: "Projekt graficzny logo",
+    description: "Przygotowanie projektu nowego logo dla klienta",
+    status: "completed",
+    priority: "high",
+    clientId: "2",
+    assigneeId: "4",
+    createdAt: "2023-05-05T11:45:00Z",
+    dueDate: "2023-05-15T15:00:00Z",
+    labels: ["grafika", "logo"]
   }
 ];
 
-// Documents
+// Dokumenty
 export const documents: Document[] = [
   {
-    id: "doc1",
+    id: "1",
     title: "Strategia marketingowa 2023",
-    content: "<h1>Strategia marketingowa 2023</h1><p>Ten dokument przedstawia strategię marketingową na rok 2023...</p>",
-    clientId: "client1",
-    createdById: "user2",
-    createdAt: "2023-05-15T10:00:00Z",
-    updatedAt: "2023-05-15T10:00:00Z",
-    isTemplate: false,
-    isPublic: true,
-    tags: ["strategia", "marketing"]
+    content: "# Strategia marketingowa\n\nTreść dokumentu strategii marketingowej...",
+    clientId: "1",
+    createdBy: "2",
+    createdAt: "2023-04-10T10:00:00Z",
+    updatedAt: "2023-04-15T14:30:00Z",
+    sharedWith: ["3", "5"]
   },
   {
-    id: "doc2",
-    title: "Raport z kampanii FB - maj 2023",
-    content: "<h1>Raport z kampanii Facebook - maj 2023</h1><p>Wyniki kampanii reklamowej na Facebooku za maj 2023...</p>",
-    clientId: "client1",
-    createdById: "user3",
-    createdAt: "2023-06-01T14:30:00Z",
-    updatedAt: "2023-06-02T09:15:00Z",
-    isTemplate: false,
-    isPublic: true,
-    tags: ["raport", "facebook"]
-  },
-  {
-    id: "doc3",
-    title: "Szablon raportu miesięcznego",
-    content: "<h1>Raport miesięczny</h1><p>Szablon raportu miesięcznego dla klientów...</p>",
-    clientId: "client1",
-    createdById: "user2",
-    createdAt: "2023-04-10T11:20:00Z",
-    updatedAt: "2023-04-10T11:20:00Z",
-    isTemplate: true,
-    isPublic: false,
-    tags: ["szablon", "raport"]
+    id: "2",
+    title: "Analiza konkurencji",
+    content: "# Analiza konkurencji\n\nSzczegółowa analiza konkurencji w branży...",
+    clientId: "2",
+    createdBy: "3",
+    createdAt: "2023-04-20T13:45:00Z",
+    updatedAt: "2023-04-22T09:15:00Z",
+    sharedWith: ["2", "6"]
   }
 ];
 
-// Invoices
+// Faktury
 export const invoices: Invoice[] = [
   {
-    id: "inv1",
-    invoiceNumber: "FV/2023/05/001",
-    clientId: "client1",
-    issuedAt: "2023-05-31T12:00:00Z",
-    dueAt: "2023-06-14T12:00:00Z",
+    id: "1",
+    number: "FV/2023/05/001",
+    clientId: "1",
+    amount: 5000,
+    currency: "PLN",
+    issueDate: "2023-05-05T00:00:00Z",
+    dueDate: "2023-05-19T00:00:00Z",
+    status: "paid",
     items: [
       {
-        id: "item1",
-        description: "Prowadzenie kampanii w mediach społecznościowych",
+        id: "1",
+        description: "Prowadzenie kampanii Google Ads",
         quantity: 1,
         unitPrice: 3000,
-        amount: 3000
+        total: 3000
       },
       {
-        id: "item2",
-        description: "Optymalizacja SEO",
+        id: "2",
+        description: "Obsługa mediów społecznościowych",
         quantity: 1,
         unitPrice: 2000,
-        amount: 2000
+        total: 2000
       }
-    ],
-    subtotal: 5000,
-    taxRate: 23,
-    taxAmount: 1150,
-    total: 6150,
-    status: "paid",
-    notes: "Faktura za usługi marketingowe za maj 2023."
+    ]
   },
   {
-    id: "inv2",
-    invoiceNumber: "FV/2023/06/001",
-    clientId: "client2",
-    issuedAt: "2023-06-02T10:30:00Z",
-    dueAt: "2023-06-16T10:30:00Z",
+    id: "2",
+    number: "FV/2023/05/002",
+    clientId: "2",
+    amount: 7500,
+    currency: "PLN",
+    issueDate: "2023-05-10T00:00:00Z",
+    dueDate: "2023-05-24T00:00:00Z",
+    status: "sent",
     items: [
       {
-        id: "item3",
-        description: "Przygotowanie i prowadzenie kampanii Google Ads",
+        id: "3",
+        description: "Projekt logo",
         quantity: 1,
-        unitPrice: 4000,
-        amount: 4000
+        unitPrice: 2500,
+        total: 2500
+      },
+      {
+        id: "4",
+        description: "Projekt strony www",
+        quantity: 1,
+        unitPrice: 5000,
+        total: 5000
       }
-    ],
-    subtotal: 4000,
-    taxRate: 23,
-    taxAmount: 920,
-    total: 4920,
-    status: "sent",
-    notes: "Faktura za usługi marketingowe za czerwiec 2023."
+    ]
   }
 ];
 
-// Google Ads data
+// Dane Google Ads
 export const adsData: AdsData[] = [
   {
-    id: "ads1",
-    clientId: "client1",
-    campaignId: "c-123456",
+    id: "1",
+    clientId: "1",
     campaignName: "Kampania produktowa",
-    impressions: 50000,
-    clicks: 2500,
-    ctr: 5.0,
-    conversions: 125,
-    cost: 3750,
-    period: "last_30_days"
-  },
-  {
-    id: "ads2",
-    clientId: "client1",
-    campaignId: "c-123457",
-    campaignName: "Kampania brandowa",
-    impressions: 30000,
-    clicks: 1800,
+    impressions: 12500,
+    clicks: 750,
+    conversions: 25,
+    cost: 1500,
     ctr: 6.0,
-    conversions: 90,
-    cost: 2700,
-    period: "last_30_days"
+    date: "2023-05-01T00:00:00Z"
   },
   {
-    id: "ads3",
-    clientId: "client2",
-    campaignId: "c-234567",
-    campaignName: "Kampania promocyjna",
-    impressions: 45000,
-    clicks: 2250,
-    ctr: 5.0,
-    conversions: 112,
-    cost: 3375,
-    period: "last_30_days"
+    id: "2",
+    clientId: "1",
+    campaignName: "Kampania brandowa",
+    impressions: 8000,
+    clicks: 600,
+    conversions: 20,
+    cost: 1200,
+    ctr: 7.5,
+    date: "2023-05-01T00:00:00Z"
+  },
+  {
+    id: "3",
+    clientId: "2",
+    campaignName: "Kampania wizerunkowa",
+    impressions: 15000,
+    clicks: 900,
+    conversions: 30,
+    cost: 1800,
+    ctr: 6.0,
+    date: "2023-05-01T00:00:00Z"
   }
 ];
 
-// Function to get current user by role for demo purposes
-export const getCurrentUser = (role: UserRole): User => {
-  const user = users.find(u => u.role === role);
-  if (!user) {
-    throw new Error(`No user found with role ${role}`);
-  }
-  return user;
-};
+// Funkcje pomocnicze do pobierania danych
 
-// Function to get client by ID
-export const getClientById = (id: string): Client | undefined => {
-  return clients.find(client => client.id === id);
-};
-
-// Function to get tasks by client ID
 export const getTasksByClientId = (clientId: string): Task[] => {
   return tasks.filter(task => task.clientId === clientId);
 };
 
-// Function to get invoices by client ID
-export const getInvoicesByClientId = (clientId: string): Invoice[] => {
-  return invoices.filter(invoice => invoice.clientId === clientId);
+export const getTasksByAssigneeId = (assigneeId: string): Task[] => {
+  return tasks.filter(task => task.assigneeId === assigneeId);
 };
 
-// Function to get documents by client ID
 export const getDocumentsByClientId = (clientId: string): Document[] => {
   return documents.filter(doc => doc.clientId === clientId);
 };
 
-// Function to get ads data by client ID
+export const getInvoicesByClientId = (clientId: string): Invoice[] => {
+  return invoices.filter(invoice => invoice.clientId === clientId);
+};
+
 export const getAdsDataByClientId = (clientId: string): AdsData[] => {
   return adsData.filter(data => data.clientId === clientId);
+};
+
+export const getUserById = (userId: string): User | undefined => {
+  return users.find(user => user.id === userId);
+};
+
+export const getClientById = (clientId: string) => {
+  return clients.find(client => client.id === clientId);
 };

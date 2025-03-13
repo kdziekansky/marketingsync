@@ -1,5 +1,6 @@
 
-export type UserRole = 'superadmin' | 'admin' | 'employee' | 'client';
+// Typy użytkowników
+export type UserRole = "superadmin" | "admin" | "employee" | "client";
 
 export interface User {
   id: string;
@@ -7,60 +8,59 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
-  clientId?: string; // For client users (references clients table)
+  clientId?: string; // Tylko dla roli "client"
+  departmentId?: string; // Tylko dla roli "employee"
 }
 
-export interface Client {
-  id: string;
-  name: string;
-  logoUrl?: string;
-  contactName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-}
-
-export type TaskStatus = 'pending' | 'in_progress' | 'review' | 'completed';
+// Typy dla zadań
+export type TaskStatus = "pending" | "in_progress" | "review" | "completed";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 export interface Task {
   id: string;
   title: string;
   description: string;
   status: TaskStatus;
+  priority: TaskPriority;
   clientId: string;
   assigneeId?: string;
-  createdAt: string; // ISO date string
-  dueDate?: string; // ISO date string
-  priority: 'low' | 'medium' | 'high';
-  attachments?: string[]; // URLs to attachments
-  tags?: string[];
+  createdAt: string;
+  dueDate?: string;
+  labels: string[];
+  attachments?: string[];
+  comments?: Comment[];
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+}
+
+// Typy dla dokumentów
 export interface Document {
   id: string;
   title: string;
-  content: string; // HTML or rich text content
+  content: string;
   clientId: string;
-  createdById: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  isTemplate: boolean;
-  isPublic: boolean;
-  tags?: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  sharedWith: string[];
 }
 
+// Typy dla faktur
 export interface Invoice {
   id: string;
-  invoiceNumber: string;
+  number: string;
   clientId: string;
-  issuedAt: string; // ISO date string
-  dueAt: string; // ISO date string
+  amount: number;
+  currency: string;
+  issueDate: string;
+  dueDate: string;
+  status: "draft" | "sent" | "paid" | "overdue";
   items: InvoiceItem[];
-  subtotal: number;
-  taxRate: number;
-  taxAmount: number;
-  total: number;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  notes?: string;
 }
 
 export interface InvoiceItem {
@@ -68,25 +68,18 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   unitPrice: number;
-  amount: number;
+  total: number;
 }
 
+// Typy dla danych Google Ads
 export interface AdsData {
   id: string;
   clientId: string;
-  campaignId: string;
   campaignName: string;
   impressions: number;
   clicks: number;
-  ctr: number;
   conversions: number;
   cost: number;
-  period: string; // e.g., "last_7_days", "last_30_days", etc.
-}
-
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: string;
-  roles: UserRole[];
+  ctr: number;
+  date: string;
 }

@@ -27,6 +27,7 @@ export interface Task {
   createdAt: string;
   dueDate?: string;
   labels: string[];
+  tags?: string[]; // Dodane pole dla kompatybilności z TaskCard
   attachments?: string[];
   comments?: Comment[];
 }
@@ -48,19 +49,28 @@ export interface Document {
   createdAt: string;
   updatedAt: string;
   sharedWith: string[];
+  tags?: string[]; // Dodane pole dla kompatybilności z DocumentEditor
 }
 
 // Typy dla faktur
 export interface Invoice {
   id: string;
-  number: string;
+  number: string; // Oryginalne pole
+  invoiceNumber?: string; // Dodane dla kompatybilności z InvoiceForm/List
   clientId: string;
   amount: number;
   currency: string;
   issueDate: string;
+  issuedAt?: string; // Dodane dla kompatybilności z InvoiceForm/List
   dueDate: string;
-  status: "draft" | "sent" | "paid" | "overdue";
+  dueAt?: string; // Dodane dla kompatybilności z InvoiceForm/List
+  status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
   items: InvoiceItem[];
+  notes?: string; // Dodane dla kompatybilności z InvoiceForm
+  taxRate?: number; // Dodane dla kompatybilności z InvoiceForm
+  taxAmount?: number; // Dodane dla kompatybilności z InvoiceForm
+  subtotal?: number; // Dodane dla kompatybilności z InvoiceForm
+  total?: number; // Dodane dla kompatybilności z InvoiceForm/List
 }
 
 export interface InvoiceItem {
@@ -69,6 +79,17 @@ export interface InvoiceItem {
   quantity: number;
   unitPrice: number;
   total: number;
+  amount?: number; // Dodane dla kompatybilności z InvoiceForm
+}
+
+// Dodajemy typ Client, który jest używany w InvoiceForm
+export interface Client {
+  id: string;
+  name: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
 }
 
 // Typy dla danych Google Ads

@@ -23,3 +23,6 @@ export const useMobile = () => {
 
   return isMobile;
 };
+
+// Dodajemy alias dla kompatybilności wstecznej
+export const useIsMobile = useMobile;

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,7 @@ import {
   ClipboardList,
   FileText,
   Receipt,
-  ChartLineUp,
+  ChartLine,
   Settings,
   HelpCircle,
   Briefcase,
@@ -57,7 +56,7 @@ const sidebarItems: SidebarItem[] = [
   {
     title: "Kampanie",
     href: "/campaigns",
-    icon: <ChartLineUp size={20} />,
+    icon: <ChartLine size={20} />,
     allowedRoles: ["superadmin", "admin", "employee", "client"],
   },
   {

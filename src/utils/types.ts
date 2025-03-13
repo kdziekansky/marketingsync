@@ -78,8 +78,8 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   unitPrice: number;
-  total: number;
-  amount?: number; // Dodane dla kompatybilności z InvoiceForm
+  total: number; // Wymagane pole
+  amount?: number; // Dodane dla kompatybilności z InvoiceForm, używane zamiennie z total
 }
 
 // Dodajemy typ Client, który jest używany w InvoiceForm

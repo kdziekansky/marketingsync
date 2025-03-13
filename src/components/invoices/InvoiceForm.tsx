@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Invoice, InvoiceItem, Client } from "@/utils/types";
 import { Button } from "@/components/ui/button";
@@ -31,26 +30,35 @@ const emptyInvoiceItem: InvoiceItem = {
   description: "",
   quantity: 1,
   unitPrice: 0,
-  amount: 0,
+  total: 0, // Dodane wymagane pole
+  amount: 0, // Opcjonalne pole
 };
 
 export const InvoiceForm = ({ invoice, onSave, onCancel }: InvoiceFormProps) => {
   const isEditing = !!invoice;
-  const [formData, setFormData] = useState<Invoice>(
-    invoice || {
-      id: "",
-      invoiceNumber: generateInvoiceNumber(),
-      clientId: "",
-      issuedAt: new Date().toISOString(),
-      dueAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      items: [{ ...emptyInvoiceItem, id: Math.random().toString(36).substring(2, 10) }],
-      subtotal: 0,
-      taxRate: 23,
-      taxAmount: 0,
-      total: 0,
-      status: "draft",
-    }
-  );
+  const currentDate = new Date().toISOString();
+  const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+  
+  const initialInvoice: Invoice = {
+    id: "",
+    number: generateInvoiceNumber(), // Wymagane pole z oryginalnej definicji
+    invoiceNumber: generateInvoiceNumber(), // Pole dla kompatybilności
+    clientId: "",
+    amount: 0, // Wymagane pole z oryginalnej definicji
+    currency: "PLN", // Wymagane pole z oryginalnej definicji
+    issueDate: currentDate, // Wymagane pole z oryginalnej definicji
+    issuedAt: currentDate, // Pole dla kompatybilności
+    dueDate: dueDate, // Wymagane pole z oryginalnej definicji
+    dueAt: dueDate, // Pole dla kompatybilności
+    items: [{ ...emptyInvoiceItem, id: Math.random().toString(36).substring(2, 10) }],
+    subtotal: 0,
+    taxRate: 23,
+    taxAmount: 0,
+    total: 0,
+    status: "draft",
+  };
+  
+  const [formData, setFormData] = useState<Invoice>(invoice || initialInvoice);
 
   const handleClientChange = (value: string) => {
     setFormData({ ...formData, clientId: value });
@@ -63,6 +71,7 @@ export const InvoiceForm = ({ invoice, onSave, onCancel }: InvoiceFormProps) => 
     // Recalculate amount
     if (field === "quantity" || field === "unitPrice") {
       newItems[index].amount = Number(newItems[index].quantity) * Number(newItems[index].unitPrice);
+      newItems[index].total = Number(newItems[index].quantity) * Number(newItems[index].unitPrice);
     }
     
     // Update invoice with new items and recalculate totals

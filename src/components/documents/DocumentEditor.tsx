@@ -44,6 +44,10 @@ export const DocumentEditor = ({
     }, 800);
   };
 
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditedDoc({ ...editedDoc, content: e.target.value });
+  };
+
   const formattedDate = format(new Date(document.updatedAt), "d MMMM yyyy, HH:mm", {
     locale: pl,
   });
@@ -117,9 +121,7 @@ export const DocumentEditor = ({
                 <div className="h-full">
                   <textarea
                     value={editedDoc.content.replace(/<[^>]*>/g, "")}
-                    onChange={(e) =>
-                      setEditedDoc({ ...editedDoc, content: e.target.value })
-                    }
+                    onChange={handleContentChange}
                     placeholder="Treść dokumentu..."
                     className="w-full h-full min-h-[400px] resize-none border-0 bg-transparent focus:ring-0 text-sm"
                   />

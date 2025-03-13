@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import DocumentEditorComponent from "@/components/documents/DocumentEditor";
-import { getDocumentById, documents } from "@/utils/dummyData";
+import { getDocumentById } from "@/utils/dummyData";
 import { toast } from "sonner";
 import { Document } from "@/utils/types";
 
@@ -25,7 +25,6 @@ const DocumentEditorPage = () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     createdBy: user?.id || "",
-    status: "draft",
     tags: []
   });
 
@@ -86,7 +85,8 @@ const DocumentEditorPage = () => {
         <CardContent className="pt-6">
           <DocumentEditorComponent 
             document={document}
-            onChange={handleContentChange}
+            onSave={(updatedDoc) => setDocument(updatedDoc)}
+            readOnly={false}
           />
         </CardContent>
       </Card>

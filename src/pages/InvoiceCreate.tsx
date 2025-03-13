@@ -38,21 +38,17 @@ const InvoiceCreate = () => {
     toast.success(`Faktura ${isNewInvoice ? "utworzona" : "zaktualizowana"}`);
     navigate("/invoices");
   };
+
+  const handleCancel = () => {
+    navigate("/invoices");
+  };
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="outline" size="icon" onClick={() => navigate("/invoices")}>
-          <ArrowLeft size={16} />
-        </Button>
-        <h1 className="text-2xl font-bold">
-          {isNewInvoice ? "Nowa faktura" : "Edycja faktury"}
-        </h1>
-      </div>
-      
       <InvoiceForm 
         invoice={existingInvoice}
-        onSubmit={handleSubmit}
+        onSave={handleSubmit}
+        onCancel={handleCancel}
       />
     </div>
   );

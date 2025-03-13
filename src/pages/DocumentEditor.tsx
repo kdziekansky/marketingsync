@@ -25,7 +25,8 @@ const DocumentEditorPage = () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     createdBy: user?.id || "",
-    tags: []
+    tags: [],
+    sharedWith: []
   });
 
   useEffect(() => {

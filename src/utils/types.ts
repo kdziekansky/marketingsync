@@ -13,7 +13,7 @@ export interface User {
 }
 
 // Typy dla zadań
-export type TaskStatus = "pending" | "in_progress" | "review" | "completed";
+export type TaskStatus = "pending" | "todo" | "in_progress" | "review" | "completed" | "in progress";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 export interface Task {
@@ -26,8 +26,8 @@ export interface Task {
   assigneeId?: string;
   createdAt: string;
   dueDate?: string;
-  labels: string[];
-  tags?: string[]; // Dodane pole dla kompatybilności z TaskCard
+  labels?: string[];
+  tags?: string[];
   attachments?: string[];
   comments?: Comment[];
 }
@@ -48,8 +48,9 @@ export interface Document {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
-  sharedWith: string[];
-  tags?: string[]; // Dodane pole dla kompatybilności z DocumentEditor
+  sharedWith?: string[];
+  status?: string;
+  tags?: string[];
 }
 
 // Typy dla faktur
@@ -82,14 +83,14 @@ export interface InvoiceItem {
   amount?: number; // Dodane dla kompatybilności z InvoiceForm, używane zamiennie z total
 }
 
-// Dodajemy typ Client, który jest używany w InvoiceForm
+// Dodajemy typ Client
 export interface Client {
   id: string;
   name: string;
-  contactPerson: string;
   email: string;
   phone: string;
   address: string;
+  contactPerson?: string;
 }
 
 // Typy dla danych Google Ads

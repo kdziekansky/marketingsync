@@ -6,13 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { Task } from "@/utils/types";
-import { tasks } from "@/utils/dummyData";
+import { getTaskById } from "@/utils/dummyData";
 import { toast } from "sonner";
-
-// Helper function to get task by ID since it's missing from dummyData
-const getTaskById = (id: string) => {
-  return tasks.find(task => task.id === id) || null;
-};
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -24,13 +19,14 @@ const TaskDetails = () => {
     id: isNewTask ? `task-${Date.now()}` : "",
     title: "",
     description: "",
-    status: "todo",
+    status: "pending",
     assigneeId: "",
     clientId: user?.clientId || "",
     createdAt: new Date().toISOString(),
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     priority: "medium",
-    tags: []
+    tags: [],
+    labels: []
   });
 
   useEffect(() => {

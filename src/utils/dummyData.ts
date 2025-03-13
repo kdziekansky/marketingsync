@@ -1,4 +1,5 @@
-import { Task, Document, Invoice, User, Client } from "./types";
+
+import { Task, Document, Invoice, User, Client, AdsData } from "./types";
 
 // Dummy data for tasks
 export const tasks: Task[] = [
@@ -6,13 +7,14 @@ export const tasks: Task[] = [
     id: "1",
     title: "Stworzenie landing page",
     description: "Zaprojektowanie i wdrożenie landing page dla nowego produktu.",
-    status: "in progress",
+    status: "in_progress",
     assigneeId: "3",
     clientId: "1",
     createdAt: "2023-08-01T10:00:00Z",
     dueDate: "2023-08-15T16:00:00Z",
     priority: "high",
     tags: ["web", "design", "marketing"],
+    labels: [],
   },
   {
     id: "2",
@@ -25,6 +27,7 @@ export const tasks: Task[] = [
     dueDate: "2023-08-20T17:00:00Z",
     priority: "medium",
     tags: ["ads", "google", "ppc"],
+    labels: [],
   },
   {
     id: "3",
@@ -37,6 +40,7 @@ export const tasks: Task[] = [
     dueDate: "2023-07-30T18:00:00Z",
     priority: "low",
     tags: ["seo", "raport", "analiza"],
+    labels: [],
   },
 ];
 
@@ -50,7 +54,8 @@ export const documents: Document[] = [
     updatedAt: "2023-03-20T14:45:00Z",
     createdBy: "user1",
     status: "published",
-    tags: ["marketing", "strategia", "2023"]
+    tags: ["marketing", "strategia", "2023"],
+    sharedWith: [],
   },
   {
     id: "doc2",
@@ -61,7 +66,8 @@ export const documents: Document[] = [
     updatedAt: "2023-07-02T09:15:00Z",
     createdBy: "user2",
     status: "draft",
-    tags: ["SEO", "raport", "2023"]
+    tags: ["SEO", "raport", "2023"],
+    sharedWith: [],
   },
   {
     id: "doc3",
@@ -72,7 +78,8 @@ export const documents: Document[] = [
     updatedAt: "2023-06-01T13:30:00Z",
     createdBy: "user3",
     status: "published",
-    tags: ["Google Ads", "analiza", "kampania"]
+    tags: ["Google Ads", "analiza", "kampania"],
+    sharedWith: [],
   }
 ];
 
@@ -220,6 +227,7 @@ export const clients: Client[] = [
     email: "kontakt@abc.pl",
     phone: "123-456-789",
     address: "ul. Kwiatowa 1, 00-001 Warszawa",
+    contactPerson: "Adam Nowak",
   },
   {
     id: "2",
@@ -227,7 +235,56 @@ export const clients: Client[] = [
     email: "ewa@xyz.pl",
     phone: "987-654-321",
     address: "pl. Wolności 10, 30-001 Kraków",
+    contactPerson: "Ewa Jankowska",
   },
+];
+
+// Dummy data for Google Ads
+export const adsData: AdsData[] = [
+  {
+    id: "ads1",
+    clientId: "1",
+    campaignName: "Kampania brandowa",
+    impressions: 15000,
+    clicks: 750,
+    conversions: 35,
+    cost: 2500,
+    ctr: 5.0,
+    date: "2023-07-01T00:00:00Z"
+  },
+  {
+    id: "ads2",
+    clientId: "1",
+    campaignName: "Kampania produktowa",
+    impressions: 28000,
+    clicks: 1200,
+    conversions: 60,
+    cost: 3800,
+    ctr: 4.3,
+    date: "2023-07-01T00:00:00Z"
+  },
+  {
+    id: "ads3",
+    clientId: "2",
+    campaignName: "Promocja letnia",
+    impressions: 32000,
+    clicks: 1600,
+    conversions: 80,
+    cost: 4200,
+    ctr: 5.0,
+    date: "2023-07-01T00:00:00Z"
+  },
+  {
+    id: "ads4",
+    clientId: "2",
+    campaignName: "Remarketing",
+    impressions: 18000,
+    clicks: 950,
+    conversions: 40,
+    cost: 1800,
+    ctr: 5.3,
+    date: "2023-07-01T00:00:00Z"
+  }
 ];
 
 // Helper functions to get data by ID
@@ -248,8 +305,16 @@ export const getTasksByClientId = (clientId: string) => {
   return tasks.filter(task => task.clientId === clientId);
 };
 
+export const getDocumentsByClientId = (clientId: string) => {
+  return documents.filter(doc => doc.clientId === clientId);
+};
+
 export const getInvoicesByClientId = (clientId: string) => {
   return invoices.filter(invoice => invoice.clientId === clientId);
+};
+
+export const getAdsDataByClientId = (clientId: string) => {
+  return adsData.filter(data => data.clientId === clientId);
 };
 
 export const getTasksByAssigneeId = (assigneeId: string) => {

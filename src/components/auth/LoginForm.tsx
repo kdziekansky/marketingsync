@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,22 +13,34 @@ export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loginWithProvider } = useSupabaseAuth();
+  const { login, loginWithProvider, user, isAuthenticated } = useSupabaseAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Dodane: Efekt do przekierowania zalogowanego użytkownika
+  useEffect(() => {
+    console.log("Sprawdzanie autentykacji:", { isAuthenticated, user });
+    
+    if (isAuthenticated && user) {
+      console.log("Użytkownik zalogowany, przekierowuję na stronę główną");
+      // Użyj setTimeout, aby dać czas na zakończenie renderowania
+      setTimeout(() => navigate("/"), 100);
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Zmiana: Dodanie logów, aby pomóc w debugowaniu
       console.log("Próba logowania z danymi:", { email });
       
       const { success, error } = await login(email, password);
       
       if (success) {
+        console.log("Logowanie zakończone sukcesem, toast zostanie wyświetlony");
         toast.success("Zalogowano pomyślnie");
-        navigate("/");
+        // Nie robimy przekierowania tutaj, przekierowanie jest obsługiwane przez useEffect
       } else {
         console.error("Błąd logowania:", error);
         toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
@@ -49,34 +61,29 @@ export const LoginForm = () => {
     }
   };
 
-  // Dodanie: Funkcja do szybkiego logowania dla celów demonstracyjnych
+  // Funkcja do szybkiego logowania dla celów demonstracyjnych
   const handleDemoLogin = async (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword("password");
+    setIsLoading(true);
     
-    // Symuluj kliknięcie przycisku logowania
-    const form = document.querySelector('form');
-    if (form) {
-      form.dispatchEvent(new Event('submit', { cancelable: true }));
-    } else {
-      // Jeśli nie można znaleźć formularza, wykonaj logowanie bezpośrednio
-      setIsLoading(true);
-      try {
-        const { success, error } = await login(demoEmail, "password");
-        
-        if (success) {
-          toast.success("Zalogowano pomyślnie");
-          navigate("/");
-        } else {
-          console.error("Błąd logowania demo:", error);
-          toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
-        }
-      } catch (error: any) {
-        console.error("Nieoczekiwany błąd:", error);
-        toast.error("Wystąpił nieoczekiwany błąd podczas logowania");
-      } finally {
-        setIsLoading(false);
+    try {
+      console.log("Logowanie demo z użytkownikiem:", demoEmail);
+      const { success, error } = await login(demoEmail, "password");
+      
+      if (success) {
+        console.log("Logowanie demo zakończone sukcesem");
+        toast.success("Zalogowano pomyślnie");
+        // Przekierowanie obsługiwane przez useEffect
+      } else {
+        console.error("Błąd logowania demo:", error);
+        toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
       }
+    } catch (error: any) {
+      console.error("Nieoczekiwany błąd:", error);
+      toast.error("Wystąpił nieoczekiwany błąd podczas logowania");
+    } finally {
+      setIsLoading(false);
     }
   };
 

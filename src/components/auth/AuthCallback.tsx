@@ -12,17 +12,21 @@ export const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        console.log("Obsługa callback dla uwierzytelniania OAuth");
         const { error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error("Błąd podczas obsługi callback:", error);
           setError(error.message);
           toast.error(`Błąd logowania: ${error.message}`);
           setTimeout(() => navigate("/login"), 3000);
         } else {
+          console.log("Callback OAuth zakończony sukcesem, przekierowuję na stronę główną");
           toast.success("Zalogowano pomyślnie");
           navigate("/");
         }
       } catch (e: any) {
+        console.error("Nieoczekiwany błąd podczas callback:", e);
         setError(e.message);
         toast.error(`Wystąpił nieoczekiwany błąd: ${e.message}`);
         setTimeout(() => navigate("/login"), 3000);

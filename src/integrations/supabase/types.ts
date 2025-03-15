@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type SupabaseDatabase = {
+export type Database = {
   public: {
     Tables: {
       profiles: {

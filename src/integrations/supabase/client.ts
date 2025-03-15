@@ -1,12 +1,12 @@
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
+import type { SupabaseDatabase } from './types';
 
 const SUPABASE_URL = "https://zqzxyqtfccjxyhdtsqqu.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxenh5cXRmY2NqeHloZHRzcXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5OTgxMDQsImV4cCI6MjA1NzU3NDEwNH0.Z1JC9B1HtLXEuXGzzBJBuPhATYSDnzZ46A3x1aRpAhM";
 
 // Eksportujemy klienta Supabase z poprawnym typem
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<SupabaseDatabase>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // Dodajemy funkcję demonstracyjną do testowania logowania
 export const testAuth = async () => {

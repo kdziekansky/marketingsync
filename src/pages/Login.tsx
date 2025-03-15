@@ -25,10 +25,10 @@ export const Login = () => {
     // Wprowadź opóźnienie między rejestraciami, aby uniknąć limitu API
     for (const [index, user] of TEST_USERS.entries()) {
       try {
-        // Odczekaj chwilę między rejestracjami, aby uniknąć ograniczeń API
-        // Zwiększaj opóźnienie dla każdego kolejnego użytkownika
+        // Odczekaj dłuższą chwilę między rejestracjami, aby uniknąć ograniczeń API
+        // Zwiększam opóźnienie dla każdego kolejnego użytkownika
         if (index > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1500 * index));
+          await new Promise(resolve => setTimeout(resolve, 3000 * index));
         }
         
         // Sprawdź, czy użytkownik już istnieje i zarejestruj go
@@ -45,7 +45,7 @@ export const Login = () => {
         }
         
         if (error) {
-          console.log(`Użytkownik ${user.email} już może istnieć: ${error}`);
+          console.log(`Błąd przy weryfikacji użytkownika ${user.email}: ${error}`);
         } else if (data) {
           console.log(`Weryfikacja użytkownika testowego: ${user.email} zakończona pomyślnie`);
         }

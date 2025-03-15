@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 // Importujemy typ jako DbSchema, aby uniknąć konfliktu nazw
 import type { Database as DbSchema } from './types';

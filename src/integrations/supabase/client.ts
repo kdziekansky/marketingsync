@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 // Import typu używając aliasu, aby uniknąć konfliktu nazw
 import type { Database } from './types';

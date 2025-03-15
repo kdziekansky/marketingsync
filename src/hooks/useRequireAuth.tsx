@@ -8,7 +8,9 @@ export const useRequireAuth = (redirectUrl = "/login") => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Przekieruj tylko gdy proces ładowania się zakończył i nie ma użytkownika
     if (!isLoading && !user) {
+      console.log("useRequireAuth: Brak zalogowanego użytkownika, przekierowuję do", redirectUrl);
       navigate(redirectUrl);
     }
   }, [user, isLoading, navigate, redirectUrl]);

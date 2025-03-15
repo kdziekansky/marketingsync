@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import LoginForm from "@/components/auth/LoginForm";
 import { useSupabaseAuth } from "@/components/auth/SupabaseAuthContext";
@@ -15,24 +16,36 @@ export const Login = () => {
   const { isAuthenticated, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Funkcja do utworzenia użytkowników testowych
+  // Funkcja do utworzenia użytkowników testowych z opóźnieniem
   const createTestUsers = async () => {
     console.log("Inicjalizacja użytkowników testowych...");
     
-    for (const user of TEST_USERS) {
+    // Wprowadź opóźnienie między rejestraciami, aby uniknąć limitu API
+    for (const [index, user] of TEST_USERS.entries()) {
       try {
+        // Odczekaj chwilę między rejestracjami, aby uniknąć ograniczeń API
+        // Zwiększaj opóźnienie dla każdego kolejnego użytkownika
+        if (index > 0) {
+          await new Promise(resolve => setTimeout(resolve, 500 * index));
+        }
+        
         // Sprawdź, czy użytkownik już istnieje
-        const { data, error } = await registerTestUser(
+        const { success, error, data, skipped } = await registerTestUser(
           user.email,
           user.password,
           user.name,
           user.role
         );
         
+        if (skipped) {
+          console.log(`Pominiętyo rejestrację użytkownika ${user.email} z powodu ograniczeń API`);
+          continue;
+        }
+        
         if (error) {
-          console.log(`Użytkownik ${user.email} już może istnieć:`, error);
-        } else {
-          console.log(`Utworzono użytkownika testowego: ${user.email}`);
+          console.log(`Błąd podczas tworzenia użytkownika ${user.email}:`, error);
+        } else if (data) {
+          console.log(`Weryfikacja użytkownika testowego: ${user.email} zakończona pomyślnie`);
         }
       } catch (e) {
         console.error(`Błąd podczas tworzenia użytkownika ${user.email}:`, e);

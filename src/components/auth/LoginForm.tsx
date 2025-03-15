@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useSupabaseAuth } from "./SupabaseAuthContext";
 import { toast } from "sonner";
 import { Loader2, Info } from "lucide-react";
-import { loginWithDemoCredentials } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -70,8 +70,11 @@ export const LoginForm = () => {
     try {
       console.log("Logowanie demo z użytkownikiem:", demoEmail);
       
-      // Używamy specjalnej funkcji do logowania demonstracyjnego
-      const { data, error } = await loginWithDemoCredentials(demoEmail, "password");
+      // Bezpośrednie logowanie z Supabase zamiast korzystania z funkcji pomocniczej
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: "password"
+      });
       
       if (error) {
         console.error("Błąd logowania demo:", error);

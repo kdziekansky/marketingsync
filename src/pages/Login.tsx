@@ -22,13 +22,36 @@ export const Login = () => {
   const createTestUsers = async () => {
     console.log("Inicjalizacja użytkowników testowych...");
     
+    // Sprawdźmy najpierw, czy możemy zalogować się na każdego z użytkowników
+    // Jeśli tak, to znaczy że istnieją i nie musimy ich tworzyć
+    let allExist = true;
+    
+    for (const user of TEST_USERS) {
+      try {
+        const { exists } = await checkIfUserExists(user.email);
+        if (!exists) {
+          allExist = false;
+          break;
+        }
+      } catch (e) {
+        console.error(`Błąd sprawdzania użytkownika ${user.email}:`, e);
+        allExist = false;
+        break;
+      }
+    }
+    
+    if (allExist) {
+      console.log("Wszyscy użytkownicy testowi już istnieją, pomijam rejestrację");
+      return;
+    }
+    
     // Wprowadź opóźnienie między rejestraciami, aby uniknąć limitu API
     for (const [index, user] of TEST_USERS.entries()) {
       try {
         // Odczekaj dłuższą chwilę między rejestracjami, aby uniknąć ograniczeń API
-        // Zwiększam opóźnienie dla każdego kolejnego użytkownika
+        // Zwiększam opóźnienie dla każdego kolejnego użytkownika (10 sekund między każdym)
         if (index > 0) {
-          await new Promise(resolve => setTimeout(resolve, 3000 * index));
+          await new Promise(resolve => setTimeout(resolve, 10000));
         }
         
         // Sprawdź, czy użytkownik już istnieje i zarejestruj go
@@ -57,6 +80,43 @@ export const Login = () => {
     console.log("Inicjalizacja użytkowników testowych zakończona");
   };
 
+  // Brakująca funkcja
+  const checkIfUserExists = async (email: string): Promise<{ exists: boolean, confirmed: boolean }> => {
+    try {
+      // Spróbujmy bezpośrednio zalogować się na konto testowe
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: "password" // Używamy prawdziwego hasła dla kont testowych
+      });
+      
+      // Jeśli logowanie się powiodło, to użytkownik istnieje i ma poprawne hasło
+      if (data?.user) {
+        console.log(`Użytkownik ${email} istnieje i hasło jest poprawne`);
+        // Wylogujmy użytkownika, żeby nie pozostawić sesji
+        await supabase.auth.signOut();
+        return { exists: true, confirmed: true };
+      }
+      
+      // Jeśli mamy błąd "Invalid login credentials", sprawdźmy czy użytkownik istnieje w inny sposób
+      if (error) {
+        // Sprawdzamy, czy użytkownik istnieje sprawdzając resetowanie hasła
+        const { data: resetData, error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+        
+        // Jeśli nie ma błędu przy resetowaniu hasła, użytkownik prawdopodobnie istnieje
+        if (!resetError) {
+          console.log(`Użytkownik ${email} istnieje ale hasło nie pasuje`);
+          return { exists: true, confirmed: false };
+        }
+      }
+      
+      console.log(`Użytkownik ${email} nie istnieje`);
+      return { exists: false, confirmed: false };
+    } catch (e) {
+      console.error("Błąd podczas sprawdzania istnienia użytkownika:", e);
+      return { exists: false, confirmed: false };
+    }
+  };
+
   useEffect(() => {
     // Testujemy stan autoryzacji na stronie logowania
     testAuth().then(({ data }) => {
@@ -64,10 +124,13 @@ export const Login = () => {
     });
     
     // Przy pierwszym ładowaniu strony, próbujemy utworzyć użytkowników testowych
-    createTestUsers().catch(err => {
-      console.error("Błąd podczas inicjalizacji użytkowników testowych:", err);
-      toast.error("Nie udało się zainicjalizować użytkowników testowych");
-    });
+    // ale tylko jeśli nie są jeszcze zalogowani
+    if (!isAuthenticated && !isLoading) {
+      createTestUsers().catch(err => {
+        console.error("Błąd podczas inicjalizacji użytkowników testowych:", err);
+        toast.error("Nie udało się zainicjalizować użytkowników testowych");
+      });
+    }
 
     // Jeśli użytkownik jest już zalogowany, przekieruj go na stronę główną
     if (!isLoading && isAuthenticated) {

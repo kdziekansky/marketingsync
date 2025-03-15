@@ -1,12 +1,11 @@
-
 import { createClient } from '@supabase/supabase-js';
-import type { SupabaseDatabase } from './types';
+import type { Database } from './types';
 
 const SUPABASE_URL = "https://zqzxyqtfccjxyhdtsqqu.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxenh5cXRmY2NqeHloZHRzcXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5OTgxMDQsImV4cCI6MjA1NzU3NDEwNH0.Z1JC9B1HtLXEuXGzzBJBuPhATYSDnzZ46A3x1aRpAhM";
 
 // Eksportujemy klienta Supabase z poprawnym typem
-export const supabase = createClient<SupabaseDatabase>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // Dodajemy funkcję demonstracyjną do testowania logowania
 export const testAuth = async () => {
@@ -57,7 +56,7 @@ const checkIfUserExists = async (email: string): Promise<{ exists: boolean, conf
   }
 };
 
-// Funkcja do rejestracji użytkowników testowych z poprawioną obsługą błędów
+// Teraz poprawmy funkcję registerTestUser, która powoduje błędy
 export const registerTestUser = async (email: string, password: string, name: string, role: string = 'client') => {
   try {
     console.log(`Próba rejestracji użytkownika testowego: ${email}`);
@@ -74,7 +73,25 @@ export const registerTestUser = async (email: string, password: string, name: st
       };
     }
     
-    // 1. Zarejestruj użytkownika w auth
+    // Próbujemy zalogować użytkownika zamiast próbować go zarejestrować, 
+    // skoro wiemy że już istnieją w bazie
+    if (email.includes('@agencja.pl') || email.includes('@abc.pl')) {
+      // To jest użytkownik testowy, próbujemy zalogować zamiast rejestrować
+      const { data: authData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (loginError) {
+        console.log(`Błąd logowania dla istniejącego użytkownika ${email}: ${loginError.message}`);
+        return { success: false, error: loginError.message };
+      }
+      
+      console.log(`Pomyślnie zalogowano istniejącego użytkownika ${email}`);
+      return { success: true, data: authData };
+    }
+    
+    // Jeśli to nie jest użytkownik testowy, kontynuujemy normalną rejestrację
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,

@@ -5,17 +5,18 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { cn } from "@/lib/utils";
 import { useMobile } from "@/hooks/use-mobile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface PageContainerProps {
   children: React.ReactNode;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useSupabaseAuth();
+  const { isAuthenticated, isLoading, session } = useSupabaseAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useMobile();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -23,12 +24,22 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
 
   // Przekieruj do logowania, jeśli użytkownik nie jest zalogowany
   useEffect(() => {
-    console.log("PageContainer sprawdza autentykację:", { isAuthenticated, isLoading });
-    if (!isLoading && !isAuthenticated) {
+    console.log("PageContainer sprawdza autentykację:", { 
+      isAuthenticated, 
+      isLoading, 
+      currentPath: location.pathname,
+      session: session ? "istnieje" : "brak" 
+    });
+    
+    // Publiczne ścieżki, które nie wymagają logowania
+    const publicPaths = ['/login', '/register', '/auth/callback', '/reset-password'];
+    const isPublicPath = publicPaths.includes(location.pathname);
+    
+    if (!isLoading && !isAuthenticated && !isPublicPath) {
       console.log("Użytkownik nie jest zalogowany, przekierowuję do /login");
       navigate("/login");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, location.pathname, session]);
 
   // Na urządzeniach mobilnych, domyślnie ukrywamy sidebar
   useEffect(() => {
@@ -39,11 +50,19 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children }) => {
     }
   }, [isMobile]);
 
-  // Jeśli trwa ładowanie lub użytkownik nie jest zalogowany, wyświetl pusty kontener
-  if (isLoading || !isAuthenticated) {
+  // Jeśli trwa ładowanie lub użytkownik nie jest zalogowany na chronionej ścieżce, wyświetl loader
+  const publicPaths = ['/login', '/register', '/auth/callback', '/reset-password'];
+  const isPublicPath = publicPaths.includes(location.pathname);
+  
+  if (isLoading || (!isAuthenticated && !isPublicPath)) {
     return <div className="min-h-screen flex items-center justify-center">
       <div className="animate-pulse">Ładowanie...</div>
     </div>;
+  }
+
+  // Jeśli to publiczna ścieżka, nie pokazuj układu z Sidebar i Navbar
+  if (isPublicPath) {
+    return <div className="min-h-screen">{children}</div>;
   }
 
   return (

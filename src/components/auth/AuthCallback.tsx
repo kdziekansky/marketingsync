@@ -13,7 +13,7 @@ export const AuthCallback = () => {
     const handleCallback = async () => {
       try {
         console.log("Obsługa callback dla uwierzytelniania OAuth");
-        const { error } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Błąd podczas obsługi callback:", error);
@@ -21,9 +21,17 @@ export const AuthCallback = () => {
           toast.error(`Błąd logowania: ${error.message}`);
           setTimeout(() => navigate("/login"), 3000);
         } else {
-          console.log("Callback OAuth zakończony sukcesem, przekierowuję na stronę główną");
-          toast.success("Zalogowano pomyślnie");
-          navigate("/");
+          console.log("Callback OAuth zakończony sukcesem, dane sesji:", data);
+          if (data.session) {
+            console.log("Użytkownik zalogowany, ID:", data.session.user.id);
+            toast.success("Zalogowano pomyślnie");
+            navigate("/");
+          } else {
+            console.error("Brak danych sesji w odpowiedzi");
+            setError("Nie można pobrać danych sesji");
+            toast.error("Błąd podczas pobierania danych sesji");
+            setTimeout(() => navigate("/login"), 3000);
+          }
         }
       } catch (e: any) {
         console.error("Nieoczekiwany błąd podczas callback:", e);

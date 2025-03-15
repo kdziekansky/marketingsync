@@ -47,18 +47,23 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
 
   // Pobierz profil użytkownika z bazy danych
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching user profile:', error);
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+
+      return data as UserProfile;
+    } catch (e) {
+      console.error('Exception fetching profile:', e);
       return null;
     }
-
-    return data as UserProfile;
   };
 
   // Sprawdź sesję przy ładowaniu
@@ -170,19 +175,24 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
 
       // Utwórz profil użytkownika
       if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email,
-            name,
-            role: 'client',
-            created_at: new Date().toISOString(),
-          });
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email,
+              name,
+              role: 'client',
+              created_at: new Date().toISOString(),
+            });
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          return { success: false, error: profileError.message };
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            return { success: false, error: profileError.message };
+          }
+        } catch (e) {
+          console.error('Exception creating profile:', e);
+          return { success: false, error: 'Błąd podczas tworzenia profilu użytkownika' };
         }
       }
 
@@ -232,18 +242,23 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
         return { success: false, error: 'Użytkownik nie jest zalogowany' };
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update(data)
+          .eq('id', user.id);
 
-      if (error) {
-        return { success: false, error: error.message };
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        // Aktualizuj lokalny stan
+        setUser({ ...user, ...data });
+        return { success: true };
+      } catch (e) {
+        console.error('Exception updating profile:', e);
+        return { success: false, error: 'Błąd podczas aktualizacji profilu' };
       }
-
-      // Aktualizuj lokalny stan
-      setUser({ ...user, ...data });
-      return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message };
     }

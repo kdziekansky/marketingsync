@@ -130,8 +130,15 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
   const loginWithProvider = async (provider: AuthProvider) => {
     try {
       setError(null);
+      const providerMap: Record<AuthProvider, any> = {
+        'email': 'email',
+        'google': 'google',
+        'github': 'github',
+        'facebook': 'facebook'
+      };
+      
       await supabase.auth.signInWithOAuth({
-        provider,
+        provider: providerMap[provider],
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -169,7 +176,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
             id: data.user.id,
             email,
             name,
-            role: 'client', // Domyślna rola
+            role: 'client',
             created_at: new Date().toISOString(),
           });
 

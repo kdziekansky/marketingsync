@@ -21,6 +21,52 @@ export const testAuth = async () => {
   }
 };
 
+// Funkcja do rejestracji użytkowników testowych
+export const registerTestUser = async (email: string, password: string, name: string, role: string = 'client') => {
+  try {
+    console.log(`Próba rejestracji użytkownika testowego: ${email}`);
+    
+    // 1. Zarejestruj użytkownika w auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name, role }
+      }
+    });
+    
+    if (authError) {
+      console.error("Błąd rejestracji auth:", authError);
+      return { success: false, error: authError.message };
+    }
+    
+    console.log("Rejestracja auth zakończona pomyślnie:", authData);
+    
+    // 2. Utwórz profil użytkownika
+    if (authData.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email,
+          name,
+          role,
+          created_at: new Date().toISOString()
+        });
+      
+      if (profileError) {
+        console.error("Błąd tworzenia profilu:", profileError);
+        return { success: false, error: profileError.message };
+      }
+    }
+    
+    return { success: true, data: authData };
+  } catch (e: any) {
+    console.error("Nieoczekiwany błąd rejestracji:", e);
+    return { success: false, error: e.message };
+  }
+};
+
 // Dodajemy funkcję do logowania demonstracyjnego
 export const loginWithDemoCredentials = async (email: string, password: string) => {
   try {

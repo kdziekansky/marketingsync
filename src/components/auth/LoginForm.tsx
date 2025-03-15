@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export const LoginForm = () => {
     try {
       console.log("Próba logowania z danymi:", { email });
       
+      // Używamy funkcji login z kontekstu auth
       const { success, error } = await login(email, password);
       
       if (success) {
@@ -69,21 +71,16 @@ export const LoginForm = () => {
     try {
       console.log("Logowanie demo z użytkownikiem:", demoEmail);
       
-      // Bezpośrednie logowanie z Supabase zamiast korzystania z funkcji pomocniczej
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: "password"
-      });
+      // Bezpośrednio używamy metody login z kontekstu auth, zamiast bezpośrednio korzystać z supabase
+      const { success, error } = await login(demoEmail, "password");
       
-      if (error) {
-        console.error("Błąd logowania demo:", error);
-        toast.error(`Błąd logowania: ${error.message || "Nieprawidłowe dane logowania"}`);
-      } else if (data && data.user) {
-        console.log("Logowanie demo zakończone sukcesem", data);
+      if (success) {
+        console.log("Logowanie demo zakończone sukcesem");
         toast.success("Zalogowano pomyślnie");
         // Przekierowanie obsługiwane przez useEffect
       } else {
-        toast.error("Nieznany błąd podczas logowania");
+        console.error("Błąd logowania demo:", error);
+        toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
       }
     } catch (error: any) {
       console.error("Nieoczekiwany błąd:", error);
@@ -93,4 +90,137 @@ export const LoginForm = () => {
     }
   };
 
-  // ... keep existing code (render method)
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold">Logowanie</CardTitle>
+        <CardDescription>
+          Wprowadź swoje dane, aby się zalogować
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="przyklad@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Hasło</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logowanie...
+              </>
+            ) : (
+              "Zaloguj się"
+            )}
+          </Button>
+        </form>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Konta testowe
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleDemoLogin("jan@agencja.pl")}
+            disabled={isLoading}
+          >
+            SuperAdmin
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleDemoLogin("anna@agencja.pl")}
+            disabled={isLoading}
+          >
+            Admin
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleDemoLogin("tomasz@agencja.pl")}
+            disabled={isLoading}
+          >
+            Pracownik
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleDemoLogin("kontakt@abc.pl")}
+            disabled={isLoading}
+          >
+            Klient
+          </Button>
+        </div>
+
+        <div className="flex items-center p-2 border rounded-lg bg-slate-50 dark:bg-slate-900">
+          <Info className="h-4 w-4 mr-2 text-blue-500" />
+          <span className="text-xs text-muted-foreground">
+            Kliknij na jedną z powyższych ról, aby zalogować się na konto testowe.
+          </span>
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-4">
+        <div className="relative w-full">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Lub zaloguj się przez
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <Button
+            variant="outline"
+            onClick={() => handleProviderLogin("google")}
+            disabled={isLoading}
+          >
+            Google
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleProviderLogin("github")}
+            disabled={isLoading}
+          >
+            GitHub
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default LoginForm;

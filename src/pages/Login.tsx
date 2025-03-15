@@ -4,6 +4,7 @@ import { useSupabaseAuth } from "@/components/auth/SupabaseAuthContext";
 import { useNavigate } from "react-router-dom";
 import { testAuth, registerTestUser } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client"; // Dodajemy import supabase
 
 // Lista użytkowników testowych
 const TEST_USERS = [
@@ -44,7 +45,7 @@ export const Login = () => {
       return;
     }
     
-    // Wprowadź opóźnienie między rejestraciami, aby uniknąć limitu API
+    // Wprowadź opóźnienie między rejestracjami, aby uniknąć limitu API
     for (const [index, user] of TEST_USERS.entries()) {
       try {
         // Odczekaj dłuższą chwilę między rejestracjami, aby uniknąć ograniczeń API
@@ -79,7 +80,7 @@ export const Login = () => {
     console.log("Inicjalizacja użytkowników testowych zakończona");
   };
 
-  // Brakująca funkcja
+  // Funkcja do sprawdzenia, czy użytkownik istnieje
   const checkIfUserExists = async (email: string): Promise<{ exists: boolean, confirmed: boolean }> => {
     try {
       // Spróbujmy bezpośrednio zalogować się na konto testowe

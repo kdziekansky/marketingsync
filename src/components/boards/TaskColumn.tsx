@@ -17,8 +17,7 @@ interface TaskColumnProps {
 const statusColors: Record<TaskStatus, string> = {
   pending: "bg-yellow-500",
   todo: "bg-orange-500",
-  "in_progress": "bg-blue-500",
-  "in progress": "bg-blue-500",
+  in_progress: "bg-blue-500",
   review: "bg-purple-500",
   completed: "bg-green-500",
 };

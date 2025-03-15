@@ -1,7 +1,11 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User, UserRole } from "@/utils/types";
-import { users } from "@/utils/dummyData";
+import React, { createContext, useContext, useEffect } from "react";
+import { User } from "@/utils/types";
+import { useSupabaseAuth } from "./SupabaseAuthContext";
+
+// Ten kontekst jest używany jako adapter dla istniejącego kodu,
+// który oczekuje AuthContext w starym formacie. 
+// Wewnętrznie używa SupabaseAuthContext.
 
 interface AuthContextType {
   user: User | null;
@@ -24,78 +28,46 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 interface AuthProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    user: supabaseUser, 
+    isAuthenticated: supabaseIsAuthenticated,
+    login: supabaseLogin,
+    logout: supabaseLogout,
+    isLoading: supabaseIsLoading,
+    error: supabaseError
+  } = useSupabaseAuth();
 
-  // Sprawdź, czy użytkownik jest już zalogowany (z localStorage)
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser) as User;
-          setUser(parsedUser);
-        }
-      } catch (error) {
-        console.error("Error checking auth:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  // Mapuj użytkownika Supabase na format oczekiwany przez stary kod
+  const mapToUser = (supabaseUser: any): User | null => {
+    if (!supabaseUser) return null;
+    
+    return {
+      id: supabaseUser.id,
+      name: supabaseUser.name || "Użytkownik",
+      email: supabaseUser.email || "",
+      role: supabaseUser.role || "client",
+      avatar: supabaseUser.avatar_url,
+      clientId: supabaseUser.client_id
     };
-
-    checkAuth();
-  }, []);
-
-  // Logowanie użytkownika
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // W normalnej aplikacji, tutaj byłoby faktyczne sprawdzenie z API
-      // Do celów demonstracyjnych, używamy danych testowych
-      
-      // Symulacja opóźnienia sieci
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Znajdź użytkownika w danych testowych
-      const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (foundUser && password === "password") { // W prawdziwej aplikacji nigdy nie porównujemy haseł bezpośrednio
-        setUser(foundUser);
-        localStorage.setItem("user", JSON.stringify(foundUser));
-        return true;
-      } else {
-        setError("Nieprawidłowy email lub hasło");
-        return false;
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Wystąpił błąd podczas logowania");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  // Wylogowanie użytkownika
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  // Wrapper dla metody login
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const { success } = await supabaseLogin(email, password);
+    return success;
   };
 
   const value = {
-    user,
-    isAuthenticated: !!user,
+    user: mapToUser(supabaseUser),
+    isAuthenticated: supabaseIsAuthenticated,
     login,
-    logout,
-    isLoading,
-    error
+    logout: supabaseLogout,
+    isLoading: supabaseIsLoading,
+    error: supabaseError
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

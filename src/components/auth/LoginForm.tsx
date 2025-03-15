@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSupabaseAuth } from "./SupabaseAuthContext";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
+import { loginWithDemoCredentials } from "@/integrations/supabase/client";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +16,6 @@ export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login, loginWithProvider, user, isAuthenticated } = useSupabaseAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Dodane: Efekt do przekierowania zalogowanego użytkownika
   useEffect(() => {
@@ -68,15 +69,20 @@ export const LoginForm = () => {
     
     try {
       console.log("Logowanie demo z użytkownikiem:", demoEmail);
-      const { success, error } = await login(demoEmail, "password");
       
-      if (success) {
+      // Używamy specjalnej funkcji do logowania demonstracyjnego, która
+      // najpierw spróbuje utworzyć użytkownika, jeśli nie istnieje
+      const { data, error } = await loginWithDemoCredentials(demoEmail, "password");
+      
+      if (error) {
+        console.error("Błąd logowania demo:", error.message);
+        toast.error(`Błąd logowania: ${error.message || "Nieprawidłowe dane logowania"}`);
+      } else if (data && data.user) {
         console.log("Logowanie demo zakończone sukcesem");
         toast.success("Zalogowano pomyślnie");
         // Przekierowanie obsługiwane przez useEffect
       } else {
-        console.error("Błąd logowania demo:", error);
-        toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
+        toast.error("Nieznany błąd podczas logowania");
       }
     } catch (error: any) {
       console.error("Nieoczekiwany błąd:", error);
@@ -93,6 +99,12 @@ export const LoginForm = () => {
         <CardDescription>
           Wprowadź swoje dane, aby się zalogować
         </CardDescription>
+        <div className="mt-2 p-3 bg-blue-50 text-blue-800 rounded-md flex items-start gap-2">
+          <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            Aby zalogować się na konta demonstracyjne, użyj przycisków poniżej. Hasło to "password" dla wszystkich kont.
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

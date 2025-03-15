@@ -1,6 +1,5 @@
 
 import { createClient } from '@supabase/supabase-js';
-// Import typu używając aliasu, aby uniknąć konfliktu nazw
 import type { Database } from './types';
 
 const SUPABASE_URL = "https://zqzxyqtfccjxyhdtsqqu.supabase.co";
@@ -33,27 +32,32 @@ const checkIfUserExists = async (email: string) => {
     
     // Jeśli mamy błąd "Invalid login credentials", to użytkownik istnieje
     if (error && error.message.includes("Invalid login credentials")) {
-      return true;
+      return { exists: true, confirmed: true };
     }
     
     // W innych przypadkach zakładamy, że użytkownik nie istnieje
-    return false;
+    return { exists: false, confirmed: false };
   } catch (e) {
     console.error("Błąd podczas sprawdzania istnienia użytkownika:", e);
-    return false;
+    return { exists: false, confirmed: false };
   }
 };
 
-// Funkcja do rejestracji użytkowników testowych z opóźnieniem i sprawdzaniem istnienia
+// Funkcja do rejestracji użytkowników testowych z poprawioną obsługą błędów
 export const registerTestUser = async (email: string, password: string, name: string, role: string = 'client') => {
   try {
     console.log(`Próba rejestracji użytkownika testowego: ${email}`);
     
     // Najpierw sprawdź, czy użytkownik już istnieje
-    const userExists = await checkIfUserExists(email);
-    if (userExists) {
+    const { exists, confirmed } = await checkIfUserExists(email);
+    
+    if (exists) {
       console.log(`Użytkownik ${email} już istnieje - pomijam rejestrację`);
-      return { success: true, data: { user: { id: "already_exists", email } } };
+      return { 
+        success: true, 
+        data: { user: { id: "already_exists", email } },
+        skipped: true
+      };
     }
     
     // 1. Zarejestruj użytkownika w auth
@@ -61,7 +65,8 @@ export const registerTestUser = async (email: string, password: string, name: st
       email,
       password,
       options: {
-        data: { name, role }
+        data: { name, role },
+        emailRedirectTo: window.location.origin
       }
     });
     
@@ -85,8 +90,21 @@ export const registerTestUser = async (email: string, password: string, name: st
     console.log("Rejestracja auth zakończona pomyślnie:", authData);
     
     // 2. Utwórz profil użytkownika
-    if (authData.user) {
+    if (authData?.user) {
       try {
+        // Sprawdź, czy profil już istnieje
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+          
+        if (existingProfile) {
+          console.log(`Profil użytkownika ${email} już istnieje`);
+          return { success: true, data: authData };
+        }
+        
+        // Utwórz profil, jeśli nie istnieje
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -120,16 +138,38 @@ export const registerTestUser = async (email: string, password: string, name: st
   }
 };
 
-// Dodajemy funkcję do logowania demonstracyjnego
+// Funkcja do logowania demonstracyjnego - poprawiona
 export const loginWithDemoCredentials = async (email: string, password: string) => {
   try {
     console.log("Próba logowania z danymi demo:", email);
+    
+    // Najpierw sprawdźmy, czy użytkownik istnieje
+    const { exists } = await checkIfUserExists(email);
+    if (!exists) {
+      console.log(`Użytkownik ${email} nie istnieje, najpierw tworzymy konto`);
+      const { success } = await registerTestUser(email, password, email.split('@')[0], 
+        email.includes('admin') ? 'admin' : 
+        email.includes('superadmin') ? 'superadmin' : 
+        email.includes('employee') ? 'employee' : 'client'
+      );
+      
+      if (!success) {
+        return { data: null, error: { message: "Nie udało się utworzyć konta testowego" } };
+      }
+    }
+    
+    // Próba logowania
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    console.log("Wynik logowania demo:", data, "Błąd:", error);
+    if (error) {
+      console.error("Błąd logowania demo:", error);
+    } else {
+      console.log("Logowanie demo udane:", data);
+    }
+    
     return { data, error };
   } catch (e) {
     console.error("Wyjątek podczas logowania demo:", e);

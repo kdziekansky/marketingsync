@@ -4,7 +4,9 @@ import LoginForm from "@/components/auth/LoginForm";
 import { useSupabaseAuth } from "@/components/auth/SupabaseAuthContext";
 import { useNavigate } from "react-router-dom";
 import { testAuth, registerTestUser } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
+// Lista użytkowników testowych
 const TEST_USERS = [
   { email: "jan@agencja.pl", password: "password", name: "Jan Kowalski", role: "superadmin" },
   { email: "anna@agencja.pl", password: "password", name: "Anna Nowak", role: "admin" },
@@ -26,10 +28,10 @@ export const Login = () => {
         // Odczekaj chwilę między rejestracjami, aby uniknąć ograniczeń API
         // Zwiększaj opóźnienie dla każdego kolejnego użytkownika
         if (index > 0) {
-          await new Promise(resolve => setTimeout(resolve, 500 * index));
+          await new Promise(resolve => setTimeout(resolve, 800 * index));
         }
         
-        // Sprawdź, czy użytkownik już istnieje
+        // Sprawdź, czy użytkownik już istnieje i zarejestruj go
         const { success, error, data, skipped } = await registerTestUser(
           user.email,
           user.password,
@@ -38,12 +40,12 @@ export const Login = () => {
         );
         
         if (skipped) {
-          console.log(`Pominiętyo rejestrację użytkownika ${user.email} z powodu ograniczeń API`);
+          console.log(`Pominięto rejestrację użytkownika ${user.email} z powodu ograniczeń API`);
           continue;
         }
         
         if (error) {
-          console.log(`Błąd podczas tworzenia użytkownika ${user.email}:`, error);
+          console.log(`Użytkownik ${user.email} już może istnieć: ${error}`);
         } else if (data) {
           console.log(`Weryfikacja użytkownika testowego: ${user.email} zakończona pomyślnie`);
         }
@@ -62,7 +64,10 @@ export const Login = () => {
     });
     
     // Przy pierwszym ładowaniu strony, próbujemy utworzyć użytkowników testowych
-    createTestUsers();
+    createTestUsers().catch(err => {
+      console.error("Błąd podczas inicjalizacji użytkowników testowych:", err);
+      toast.error("Nie udało się zainicjalizować użytkowników testowych");
+    });
 
     // Jeśli użytkownik jest już zalogowany, przekieruj go na stronę główną
     if (!isLoading && isAuthenticated) {

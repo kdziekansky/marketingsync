@@ -21,21 +21,35 @@ export const testAuth = async () => {
 };
 
 // Funkcja do sprawdzania, czy użytkownik już istnieje
-const checkIfUserExists = async (email: string) => {
+const checkIfUserExists = async (email: string): Promise<{ exists: boolean, confirmed: boolean }> => {
   try {
-    // Próbujemy zalogować się na konto z pustym hasłem - to zawsze się nie powiedzie,
-    // ale jeśli użytkownik istnieje, otrzymamy konkretny błąd
-    const { error } = await supabase.auth.signInWithPassword({
+    // Spróbujmy bezpośrednio zalogować się na konto testowe
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password: "check_if_exists_only"
+      password: "password" // Używamy prawdziwego hasła dla kont testowych
     });
     
-    // Jeśli mamy błąd "Invalid login credentials", to użytkownik istnieje
-    if (error && error.message.includes("Invalid login credentials")) {
+    // Jeśli logowanie się powiodło, to użytkownik istnieje i ma poprawne hasło
+    if (data?.user) {
+      console.log(`Użytkownik ${email} istnieje i hasło jest poprawne`);
+      // Wylogujmy użytkownika, żeby nie pozostawić sesji
+      await supabase.auth.signOut();
       return { exists: true, confirmed: true };
     }
     
-    // W innych przypadkach zakładamy, że użytkownik nie istnieje
+    // Jeśli mamy błąd "Invalid login credentials", sprawdźmy czy użytkownik istnieje w inny sposób
+    if (error) {
+      // Sprawdzamy, czy użytkownik istnieje sprawdzając resetowanie hasła
+      const { data: resetData, error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+      
+      // Jeśli nie ma błędu przy resetowaniu hasła, użytkownik prawdopodobnie istnieje
+      if (!resetError) {
+        console.log(`Użytkownik ${email} istnieje ale hasło nie pasuje`);
+        return { exists: true, confirmed: false };
+      }
+    }
+    
+    console.log(`Użytkownik ${email} nie istnieje`);
     return { exists: false, confirmed: false };
   } catch (e) {
     console.error("Błąd podczas sprawdzania istnienia użytkownika:", e);
@@ -131,6 +145,7 @@ export const registerTestUser = async (email: string, password: string, name: st
       }
     }
     
+    console.log(`Weryfikacja użytkownika testowego: ${email} zakończona pomyślnie`);
     return { success: true, data: authData };
   } catch (e: any) {
     console.error("Nieoczekiwany błąd rejestracji:", e);
@@ -143,33 +158,63 @@ export const loginWithDemoCredentials = async (email: string, password: string) 
   try {
     console.log("Próba logowania z danymi demo:", email);
     
-    // Najpierw sprawdźmy, czy użytkownik istnieje
-    const { exists } = await checkIfUserExists(email);
-    if (!exists) {
-      console.log(`Użytkownik ${email} nie istnieje, najpierw tworzymy konto`);
-      const { success } = await registerTestUser(email, password, email.split('@')[0], 
-        email.includes('admin') ? 'admin' : 
-        email.includes('superadmin') ? 'superadmin' : 
-        email.includes('employee') ? 'employee' : 'client'
-      );
-      
-      if (!success) {
-        return { data: null, error: { message: "Nie udało się utworzyć konta testowego" } };
-      }
-    }
-    
-    // Próba logowania
+    // Bezpośrednie logowanie z podanymi danymi
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    if (error) {
-      console.error("Błąd logowania demo:", error);
-    } else {
+    // Jeśli logowanie się powiodło, zwracamy dane
+    if (data?.user) {
       console.log("Logowanie demo udane:", data);
+      return { data, error: null };
     }
     
+    // Jeśli logowanie się nie powiodło
+    if (error) {
+      console.error("Błąd logowania demo:", error);
+      
+      // Sprawdźmy czy konto istnieje
+      const { exists } = await checkIfUserExists(email);
+      
+      if (!exists) {
+        // Spróbujmy utworzyć konto przed ponowną próbą logowania
+        console.log(`Użytkownik ${email} nie istnieje, tworzę konto testowe...`);
+        
+        const roleBasedOnEmail = email.includes('admin') ? 'admin' : 
+                                email.includes('superadmin') ? 'superadmin' : 
+                                email.includes('employee') ? 'employee' : 'client';
+        
+        const { success, error: registerError } = await registerTestUser(
+          email, 
+          password, 
+          email.split('@')[0], 
+          roleBasedOnEmail
+        );
+        
+        if (!success) {
+          return { data: null, error: { message: registerError || "Nie udało się utworzyć konta testowego" } };
+        }
+        
+        // Teraz spróbuj ponownie zalogować
+        const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (retryError) {
+          console.error("Błąd logowania po utworzeniu konta:", retryError);
+          return { data: null, error: retryError };
+        }
+        
+        console.log("Logowanie po utworzeniu konta udane:", retryData);
+        return { data: retryData, error: null };
+      }
+      
+      return { data: null, error };
+    }
+    
+    // Ten kod nie powinien być nigdy osiągnięty, ale dodajemy dla kompletności
     return { data, error };
   } catch (e) {
     console.error("Wyjątek podczas logowania demo:", e);

@@ -70,15 +70,14 @@ export const LoginForm = () => {
     try {
       console.log("Logowanie demo z użytkownikiem:", demoEmail);
       
-      // Używamy specjalnej funkcji do logowania demonstracyjnego, która
-      // najpierw spróbuje utworzyć użytkownika, jeśli nie istnieje
+      // Używamy specjalnej funkcji do logowania demonstracyjnego
       const { data, error } = await loginWithDemoCredentials(demoEmail, "password");
       
       if (error) {
-        console.error("Błąd logowania demo:", error.message);
+        console.error("Błąd logowania demo:", error);
         toast.error(`Błąd logowania: ${error.message || "Nieprawidłowe dane logowania"}`);
       } else if (data && data.user) {
-        console.log("Logowanie demo zakończone sukcesem");
+        console.log("Logowanie demo zakończone sukcesem", data);
         toast.success("Zalogowano pomyślnie");
         // Przekierowanie obsługiwane przez useEffect
       } else {
@@ -102,7 +101,7 @@ export const LoginForm = () => {
         <div className="mt-2 p-3 bg-blue-50 text-blue-800 rounded-md flex items-start gap-2">
           <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
           <div className="text-sm">
-            Aby zalogować się na konta demonstracyjne, użyj przycisków poniżej. Hasło to "password" dla wszystkich kont.
+            Aby zalogować się na konta demonstracyjne, użyj przycisków poniżej lub wpisz email i hasło <strong>"password"</strong> dla wszystkich kont.
           </div>
         </div>
       </CardHeader>

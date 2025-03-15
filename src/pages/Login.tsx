@@ -28,7 +28,7 @@ export const Login = () => {
         // Odczekaj chwilę między rejestracjami, aby uniknąć ograniczeń API
         // Zwiększaj opóźnienie dla każdego kolejnego użytkownika
         if (index > 0) {
-          await new Promise(resolve => setTimeout(resolve, 800 * index));
+          await new Promise(resolve => setTimeout(resolve, 1500 * index));
         }
         
         // Sprawdź, czy użytkownik już istnieje i zarejestruj go
@@ -40,7 +40,7 @@ export const Login = () => {
         );
         
         if (skipped) {
-          console.log(`Pominięto rejestrację użytkownika ${user.email} z powodu ograniczeń API`);
+          console.log(`Użytkownik ${user.email} już istnieje - pomijam rejestrację`);
           continue;
         }
         

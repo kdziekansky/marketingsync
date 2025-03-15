@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -9,39 +8,3 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-// Rozszerzenie typu Database dodające tabelę profiles
-declare module './types' {
-  interface Database {
-    public: {
-      Tables: {
-        profiles: {
-          Row: {
-            id: string;
-            email: string;
-            name: string | null;
-            avatar_url: string | null;
-            role: string;
-            created_at: string;
-          };
-          Insert: {
-            id: string;
-            email: string;
-            name?: string | null;
-            avatar_url?: string | null;
-            role?: string;
-            created_at?: string;
-          };
-          Update: {
-            id?: string;
-            email?: string;
-            name?: string | null;
-            avatar_url?: string | null;
-            role?: string;
-            created_at?: string;
-          };
-        };
-      } & Database['public']['Tables'];
-    };
-  }
-}

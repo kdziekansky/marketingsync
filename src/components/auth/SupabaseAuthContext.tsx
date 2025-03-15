@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +48,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
   // Pobierz profil użytkownika z bazy danych
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
+      console.log("Pobieranie profilu dla userId:", userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -58,6 +60,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
         return null;
       }
 
+      console.log("Pobrano profil:", data);
       return data as UserProfile;
     } catch (e) {
       console.error('Exception fetching profile:', e);
@@ -70,12 +73,19 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
     const checkSession = async () => {
       try {
         setIsLoading(true);
+        console.log("Sprawdzanie sesji...");
+        
         const { data } = await supabase.auth.getSession();
+        console.log("Otrzymana sesja:", data.session);
         setSession(data.session);
 
         if (data.session?.user) {
+          console.log("Sesja zawiera użytkownika, pobieranie profilu...");
           const profile = await getUserProfile(data.session.user.id);
           setUser(profile);
+          console.log("Ustawiono użytkownika z sesji:", profile);
+        } else {
+          console.log("Brak użytkownika w sesji");
         }
       } catch (err) {
         console.error('Session check error:', err);
@@ -89,12 +99,16 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
 
     // Słuchaj zmian w autoryzacji
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log("Zdarzenie Auth:", event, newSession?.user?.id);
       setSession(newSession);
       
       if (event === 'SIGNED_IN' && newSession?.user) {
+        console.log("Zalogowano, pobieranie profilu...");
         const profile = await getUserProfile(newSession.user.id);
         setUser(profile);
+        console.log("Ustawiono użytkownika po logowaniu:", profile);
       } else if (event === 'SIGNED_OUT') {
+        console.log("Wylogowano, resetowanie stanu użytkownika");
         setUser(null);
       }
     });
@@ -107,24 +121,32 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
   // Logowanie przez email/hasło
   const login = async (email: string, password: string) => {
     try {
+      console.log("Próba logowania użytkownika:", email);
       setError(null);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Błąd logowania:", error);
         setError(error.message);
         return { success: false, error: error.message };
       }
 
+      console.log("Logowanie pomyślne, dane:", data);
+
       if (data.user) {
+        console.log("Pobieranie profilu dla", data.user.id);
         const profile = await getUserProfile(data.user.id);
         setUser(profile);
+        console.log("Ustawiono profil użytkownika:", profile);
       }
 
       return { success: true };
     } catch (err: any) {
+      console.error("Wyjątek podczas logowania:", err);
       setError(err.message);
       return { success: false, error: err.message };
     }
@@ -141,6 +163,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
         'facebook': 'facebook'
       };
       
+      console.log("Logowanie przez dostawcę:", provider);
       await supabase.auth.signInWithOAuth({
         provider: providerMap[provider],
         options: {
@@ -148,6 +171,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
         },
       });
     } catch (err: any) {
+      console.error("Błąd logowania przez dostawcę:", err);
       setError(err.message);
       toast.error(`Błąd logowania: ${err.message}`);
     }
@@ -156,7 +180,9 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
   // Rejestracja nowego użytkownika
   const signup = async (email: string, password: string, name: string) => {
     try {
+      console.log("Próba rejestracji użytkownika:", email);
       setError(null);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -168,13 +194,17 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
       });
 
       if (error) {
+        console.error("Błąd rejestracji:", error);
         setError(error.message);
         return { success: false, error: error.message };
       }
 
+      console.log("Rejestracja pomyślna, dane:", data);
+
       // Utwórz profil użytkownika
       if (data.user) {
         try {
+          console.log("Tworzenie profilu dla:", data.user.id);
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -189,6 +219,8 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
             console.error('Error creating profile:', profileError);
             return { success: false, error: profileError.message };
           }
+          
+          console.log("Profil utworzony pomyślnie");
         } catch (e) {
           console.error('Exception creating profile:', e);
           return { success: false, error: 'Błąd podczas tworzenia profilu użytkownika' };
@@ -197,6 +229,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
 
       return { success: true };
     } catch (err: any) {
+      console.error("Wyjątek podczas rejestracji:", err);
       setError(err.message);
       return { success: false, error: err.message };
     }
@@ -205,10 +238,13 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({ children }) 
   // Wylogowanie
   const logout = async () => {
     try {
+      console.log("Próba wylogowania");
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
+      console.log("Wylogowano pomyślnie");
     } catch (err: any) {
+      console.error("Błąd wylogowania:", err);
       setError(err.message);
       toast.error(`Błąd wylogowania: ${err.message}`);
     }

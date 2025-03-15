@@ -21,15 +21,20 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
+      // Zmiana: Dodanie logów, aby pomóc w debugowaniu
+      console.log("Próba logowania z danymi:", { email });
+      
       const { success, error } = await login(email, password);
       
       if (success) {
         toast.success("Zalogowano pomyślnie");
         navigate("/");
       } else {
-        toast.error(`Błąd logowania: ${error}`);
+        console.error("Błąd logowania:", error);
+        toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Nieoczekiwany błąd:", error);
       toast.error("Wystąpił nieoczekiwany błąd podczas logowania");
     } finally {
       setIsLoading(false);
@@ -41,6 +46,37 @@ export const LoginForm = () => {
       await loginWithProvider(provider);
     } catch (error) {
       toast.error("Wystąpił błąd podczas logowania z dostawcą zewnętrznym");
+    }
+  };
+
+  // Dodanie: Funkcja do szybkiego logowania dla celów demonstracyjnych
+  const handleDemoLogin = async (demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword("password");
+    
+    // Symuluj kliknięcie przycisku logowania
+    const form = document.querySelector('form');
+    if (form) {
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    } else {
+      // Jeśli nie można znaleźć formularza, wykonaj logowanie bezpośrednio
+      setIsLoading(true);
+      try {
+        const { success, error } = await login(demoEmail, "password");
+        
+        if (success) {
+          toast.success("Zalogowano pomyślnie");
+          navigate("/");
+        } else {
+          console.error("Błąd logowania demo:", error);
+          toast.error(`Błąd logowania: ${error || "Nieprawidłowe dane logowania"}`);
+        }
+      } catch (error: any) {
+        console.error("Nieoczekiwany błąd:", error);
+        toast.error("Wystąpił nieoczekiwany błąd podczas logowania");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -122,6 +158,55 @@ export const LoginForm = () => {
               onClick={() => handleProviderLogin("github")}
             >
               GitHub
+            </Button>
+          </div>
+        </div>
+
+        {/* Demo logowanie */}
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Demo logowanie
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-4">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleDemoLogin("jan@agencja.pl")}
+            >
+              Zaloguj jako Superadmin
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleDemoLogin("anna@agencja.pl")}
+            >
+              Zaloguj jako Admin
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleDemoLogin("tomasz@agencja.pl")}
+            >
+              Zaloguj jako Pracownik
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleDemoLogin("kontakt@abc.pl")}
+            >
+              Zaloguj jako Klient
             </Button>
           </div>
         </div>
